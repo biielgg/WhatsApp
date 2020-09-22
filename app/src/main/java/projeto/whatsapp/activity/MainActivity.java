@@ -27,7 +27,7 @@ import projeto.whatsapp.fragment.ConversasFragment;
 
 public class MainActivity extends AppCompatActivity {
 
-    private FirebaseAuth autenticacao;
+    private FirebaseAuth autenticacao; //usado para autenticar
     private MaterialSearchView searchView;
 
     @Override
