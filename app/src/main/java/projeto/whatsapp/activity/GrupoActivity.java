@@ -41,12 +41,20 @@ public class GrupoActivity extends AppCompatActivity {
     private ValueEventListener valueEventListenerMembros;
     private DatabaseReference usuariosRef;
     private FirebaseUser usuarioAtual;
+    private Toolbar toolbar;
+
+    private void atualizarMembrosToolbar(){
+        int totalSelecionados = listaMembrosSelecionados.size();
+        int total = listaMembros.size() + totalSelecionados;
+        toolbar.setSubtitle(totalSelecionados + " de " + total + " selecionados");
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_grupo);
-        Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
+        toolbar.setTitle("Novo Grupo");
         setSupportActionBar(toolbar);
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -92,6 +100,8 @@ public class GrupoActivity extends AppCompatActivity {
                                 //Adiciona usuario na nova lista de selecionados
                                 listaMembrosSelecionados.add(usuarioSelecionado);
                                 grupoSelecionadoAdapter.notifyDataSetChanged();
+
+                                atualizarMembrosToolbar();
                             }
 
                             @Override
@@ -135,6 +145,8 @@ public class GrupoActivity extends AppCompatActivity {
                                 //adicionar a listagem de membros
                                 listaMembros.add(usuarioSelecionado);
                                 contatosAdapter.notifyDataSetChanged();
+
+                                atualizarMembrosToolbar();
                             }
 
                             @Override
@@ -164,6 +176,7 @@ public class GrupoActivity extends AppCompatActivity {
                 }
 
                 contatosAdapter.notifyDataSetChanged();
+                atualizarMembrosToolbar();
             }
 
             @Override
