@@ -162,7 +162,7 @@ public class GrupoActivity extends AppCompatActivity {
         fabAvancarCadastro.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent i = new Intent(GrupoActivity.this, CadastroActivity.class);
+                Intent i = new Intent(GrupoActivity.this, CadastroGrupoActivity.class);
                 i.putExtra("membros", (Serializable) listaMembrosSelecionados);
                 startActivity(i);
             }
