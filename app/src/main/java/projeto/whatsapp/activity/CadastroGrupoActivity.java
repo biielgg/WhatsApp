@@ -10,9 +10,15 @@ import androidx.appcompat.widget.Toolbar;
 
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import projeto.whatsapp.R;
+import projeto.whatsapp.model.Usuario;
 
 public class CadastroGrupoActivity extends AppCompatActivity {
+
+    private List<Usuario> listaMembrosSelecionados = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,5 +35,11 @@ public class CadastroGrupoActivity extends AppCompatActivity {
                         .setAction("Action", null).show();
             }
         });
+
+        //recuperar lista de membros passada
+        if (getIntent().getExtras() != null){
+            List<Usuario> membros = (List<Usuario>) getIntent().getExtras().getSerializable("membros");
+            listaMembrosSelecionados.addAll(membros);
+        }
     }
 }
