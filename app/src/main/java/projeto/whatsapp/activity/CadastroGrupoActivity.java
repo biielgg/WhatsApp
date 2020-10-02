@@ -26,6 +26,7 @@ public class CadastroGrupoActivity extends AppCompatActivity {
     private TextView textTotalParticipantes;
     private GrupoSelecionadoAdapter grupoSelecionadoAdapter;
     private RecyclerView recyclerMembrosSelecionados;
+    private CircleImageView imageGrupo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +40,10 @@ public class CadastroGrupoActivity extends AppCompatActivity {
         //Configurações iniciais
         textTotalParticipantes = findViewById(R.id.textTotalParticipantes);
         recyclerMembrosSelecionados = findViewById(R.id.recyclerMembrosGrupo);
+        imageGrupo = findViewById(R.id.imageGrupo);
+        
+        //Configurar evento de clique
+        imageGrupo.setOnClickListener();
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
