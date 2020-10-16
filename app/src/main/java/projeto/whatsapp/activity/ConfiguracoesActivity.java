@@ -166,15 +166,13 @@ public class ConfiguracoesActivity extends AppCompatActivity {
                     byte[] dadosImagem = baos.toByteArray();
 
                     //Salvar imagem no firebase
-                    StorageReference imagemRef = storageReference
+                    final StorageReference imagemRef = storageReference
                             .child("imagens")
                             .child("perfil")
                             .child(identificadorUsuario)
                             .child("perfil.jpeg");
-                    final StorageReference imagemRef2 = imagemRef;
 
                     UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
-                    final UploadTask uploadTask2 = imagemRef2.putBytes(dadosImagem);
 
                     uploadTask.addOnFailureListener(new OnFailureListener() {
                         @Override
@@ -190,33 +188,13 @@ public class ConfiguracoesActivity extends AppCompatActivity {
                                     "Sucesso ao fazer upload da imagem!",
                                     Toast.LENGTH_SHORT).show();
 
-                            //codigo do google pra download de imagem
-
-                            Task<Uri> urlTask = uploadTask2.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                                @Override
-                                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                                    if (!task.isSuccessful()) {
-                                        throw task.getException();
-                                    }
-
-                                    // Continue with the task to get the download URL
-                                    return imagemRef2.getDownloadUrl();
-                                }
-                            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Uri> task) {
-                                    if (task.isSuccessful()) {
-                                        Uri downloadUri = task.getResult();
-                                        atualizaFotoUsuario(downloadUri);
-                                    } else {
-                                        Toast.makeText(ConfiguracoesActivity.this,
-                                                "Erro ao baixar foto no banco de dados",
-                                                Toast.LENGTH_SHORT).show();
-                                    }
+                                    Uri downloadUri = task.getResult();
+                                    atualizaFotoUsuario(downloadUri);
                                 }
                             });
-
-                            //fim do codigo do google
                         }
                     });
                 }
