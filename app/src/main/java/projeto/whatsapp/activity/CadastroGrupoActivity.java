@@ -5,10 +5,16 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -18,6 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -27,6 +34,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
 import projeto.whatsapp.R;
 import projeto.whatsapp.adapter.GrupoSelecionadoAdapter;
 import projeto.whatsapp.config.ConfiguracaoFirebase;
+import projeto.whatsapp.model.Grupo;
 import projeto.whatsapp.model.Usuario;
 
 public class CadastroGrupoActivity extends AppCompatActivity {
@@ -38,6 +46,7 @@ public class CadastroGrupoActivity extends AppCompatActivity {
     private CircleImageView imageGrupo;
     private static final int SELECAO_GALERIA = 200;
     private StorageReference storageReference;
+    private Grupo grupo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +62,7 @@ public class CadastroGrupoActivity extends AppCompatActivity {
         recyclerMembrosSelecionados = findViewById(R.id.recyclerMembrosGrupo);
         imageGrupo = findViewById(R.id.imageGrupo);
         storageReference = ConfiguracaoFirebase.getFirebaseStorage();
+        grupo = new Grupo();
         
         //Configurar evento de clique
         imageGrupo.setOnClickListener(new View.OnClickListener() {
@@ -115,12 +125,37 @@ public class CadastroGrupoActivity extends AppCompatActivity {
                     byte[] dadosImagem = baos.toByteArray();
 
                     //Salvar imagem no firebase
-                    StorageReference imagemRef = storageReference
+                    final StorageReference imagemRef = storageReference
                             .child("imagens")
                             .child("grupos")
-                            .child("NOME PROVISORIO")
-                            .child("perfil.jpeg");
-                    final StorageReference imagemRef2 = imagemRef;
+                            .child(grupo.getId())
+                            .child("imageGrupo.jpeg");
+
+                    UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
+
+                    uploadTask.addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(CadastroGrupoActivity.this,
+                                    "Erro ao fazer upload da imagem",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                            Toast.makeText(CadastroGrupoActivity.this,
+                                    "Erro ao fazer upload da imagem",
+                                    Toast.LENGTH_SHORT).show();
+
+                            imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Uri> task) {
+                                    String url = task.getResult().toString();
+                                    grupo.setFoto(url);
+                                }
+                            });
+                        }
+                    });
 
 
                 }
