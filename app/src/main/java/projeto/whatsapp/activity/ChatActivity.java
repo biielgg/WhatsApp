@@ -261,8 +261,14 @@ public class ChatActivity extends AppCompatActivity {
                 //salvar mensagem para o destinatário
                 salvarMensagem(idUsuarioDestinatario, idUsuarioRemetente, mensagem);
 
-                //salvar conversa
-                salvarConversa(mensagem, false);
+                //salvar conversa remetente
+                salvarConversa(idUsuarioRemetente, idUsuarioDestinatario, usuarioDestinatario, mensagem, false);
+
+                //salvar conversa remetente
+                Usuario usuarioRemetente = UsuarioFirebase.getDadosUsuarioLogado();
+                salvarConversa(idUsuarioDestinatario, idUsuarioRemetente, usuarioRemetente, mensagem, false);
+
+
             } else {
                 for ( Usuario membro: grupo.getMembros()){
                     String idRemetenteGrupo = Base64Custom.codificarBase64(membro.getEmail());
@@ -276,35 +282,30 @@ public class ChatActivity extends AppCompatActivity {
                     salvarMensagem(idRemetenteGrupo, idUsuarioDestinatario, mensagem);
 
                     //salvar conversa
-                    salvarConversa(mensagem, true);
+                    salvarConversa(idRemetenteGrupo, idUsuarioDestinatario, usuarioDestinatario, mensagem, true);
 
                 }
             }
-
-
-
-
-
         }else{
             Toast.makeText(ChatActivity.this,
-                    "Erro ao baixar foto no banco de dados",
+                    "Digite uma mensagem para enviar",
                     Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void salvarConversa(Mensagem msg, boolean isGroup){
+    private void salvarConversa(String idRemetente, String idDestinatario, Usuario usuarioExibicao, Mensagem msg, boolean isGroup){
 
         //salvar conversa remetente
         Conversa conversaRemetente = new Conversa();
-        conversaRemetente.setIdRemetente(idUsuarioRemetente);
-        conversaRemetente.setIdDestinatario(idUsuarioDestinatario);
+        conversaRemetente.setIdRemetente(idRemetente);
+        conversaRemetente.setIdDestinatario(idDestinatario);
         conversaRemetente.setUltimaMensagem(msg.getMensagem());
 
         if (isGroup){ //conversa de grupo
             conversaRemetente.setIsGroup("true");
             conversaRemetente.setGrupo(grupo);
         }else{ //conversa normal
-            conversaRemetente.setUsuarioExibicao(usuarioDestinatario);
+            conversaRemetente.setUsuarioExibicao(usuarioExibicao);
             conversaRemetente.setIsGroup("false");
         }
 
