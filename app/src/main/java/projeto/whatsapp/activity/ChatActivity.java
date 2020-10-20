@@ -56,6 +56,7 @@ public class ChatActivity extends AppCompatActivity {
     private EditText editMensagem;
     private ImageView imageCamera;
     private Usuario usuarioDestinatario;
+    private Usuario usuarioRemetente;
     private DatabaseReference database;
     private StorageReference storage;
     private DatabaseReference mensagensRef;
@@ -92,6 +93,7 @@ public class ChatActivity extends AppCompatActivity {
 
         //recupera dados do usuário remetente
         idUsuarioRemetente = UsuarioFirebase.getIdentificadorUsurio();
+        usuarioRemetente = UsuarioFirebase.getDadosUsuarioLogado();
 
         Bundle bundle = getIntent().getExtras();
         if (bundle != null){
@@ -265,7 +267,6 @@ public class ChatActivity extends AppCompatActivity {
                 salvarConversa(idUsuarioRemetente, idUsuarioDestinatario, usuarioDestinatario, mensagem, false);
 
                 //salvar conversa remetente
-                Usuario usuarioRemetente = UsuarioFirebase.getDadosUsuarioLogado();
                 salvarConversa(idUsuarioDestinatario, idUsuarioRemetente, usuarioRemetente, mensagem, false);
 
 
@@ -277,6 +278,7 @@ public class ChatActivity extends AppCompatActivity {
                     Mensagem mensagem = new Mensagem();
                     mensagem.setIdUsuario(idUsuarioLogadoGrupo);
                     mensagem.setMensagem(textoMensagem);
+                    mensagem.setNome(usuarioRemetente.getNome());
 
                     //salvar mensagem para o membro
                     salvarMensagem(idRemetenteGrupo, idUsuarioDestinatario, mensagem);
