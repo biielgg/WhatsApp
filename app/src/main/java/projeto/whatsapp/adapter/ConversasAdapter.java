@@ -17,6 +17,7 @@ import java.util.List;
 import de.hdodenhof.circleimageview.CircleImageView;
 import projeto.whatsapp.R;
 import projeto.whatsapp.model.Conversa;
+import projeto.whatsapp.model.Grupo;
 import projeto.whatsapp.model.Usuario;
 
 public class ConversasAdapter extends RecyclerView.Adapter<ConversasAdapter.MyViewHolder> {
@@ -42,15 +43,29 @@ public class ConversasAdapter extends RecyclerView.Adapter<ConversasAdapter.MyVi
         Conversa conversa = conversas.get(position);
         holder.ultimaMensagem.setText(conversa.getUltimaMensagem());
 
-        Usuario usuario = conversa.getUsuarioExibicao();
-        holder.nome.setText(usuario.getNome());
-
-        if(usuario.getFoto() != null){
-            Uri uri = Uri.parse(usuario.getFoto());
-            Glide.with(context).load(uri).into(holder.foto);
-        }else{
-            holder.foto.setImageResource(R.drawable.padrao);
+        if (conversa.getIsGroup().equals("true")){
+            Grupo grupo = conversa.getGrupo();
+            holder.nome.setText((grupo.getNome()));
+            if(grupo.getFoto() != null){
+                Uri uri = Uri.parse(grupo.getFoto());
+                Glide.with(context).load(uri).into(holder.foto);
+            }else{
+                holder.foto.setImageResource(R.drawable.padrao);
+            }
+        }else {
+            Usuario usuario = conversa.getUsuarioExibicao();
+            holder.nome.setText(usuario.getNome());
+            if(usuario.getFoto() != null){
+                Uri uri = Uri.parse(usuario.getFoto());
+                Glide.with(context).load(uri).into(holder.foto);
+            }else{
+                holder.foto.setImageResource(R.drawable.padrao);
+            }
         }
+
+
+
+
     }
 
     @Override

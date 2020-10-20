@@ -160,7 +160,7 @@ public class CadastroGrupoActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             Toast.makeText(CadastroGrupoActivity.this,
-                                    "Erro ao fazer upload da imagem",
+                                    "Sucesso ao fazer upload da imagem",
                                     Toast.LENGTH_SHORT).show();
 
                             imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
