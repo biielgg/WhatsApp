@@ -117,6 +117,10 @@ public class CadastroGrupoActivity extends AppCompatActivity {
                 grupo.setMembros(listaMembrosSelecionados);
                 grupo.setNome(nomeGrupo);
                 grupo.salvar();
+
+                Intent i = new Intent(CadastroGrupoActivity.this, ChatActivity.class);
+                i.putExtra("chatGrupo", grupo);
+                startActivity(i);
             }
         });
     }
@@ -172,8 +176,6 @@ public class CadastroGrupoActivity extends AppCompatActivity {
                             });
                         }
                     });
-
-
                 }
             }catch(Exception e){
                 e.printStackTrace();
