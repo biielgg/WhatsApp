@@ -90,7 +90,6 @@ public class ContatosFragment extends Fragment {
                                     i.putExtra("chatContato", usuarioSelecionado);
                                     startActivity(i);
                                 }
-
                             }
 
                             @Override
@@ -132,22 +131,18 @@ public class ContatosFragment extends Fragment {
         valueEventListenerContatos = usuariosRef.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                limparListaContatos();
                 for(DataSnapshot dados: dataSnapshot.getChildren()){
-
-                    limparListaContatos();
-
                     Usuario usuario = dados.getValue(Usuario.class);
                     if(!usuarioAtual.getEmail().equals(usuario.getEmail())){
                         listaContatos.add(usuario);
                     }
                 }
-
                 adapter.notifyDataSetChanged();
             }
 
             @Override
             public void onCancelled(@NonNull DatabaseError databaseError) {
-
             }
         });
     }
@@ -176,7 +171,6 @@ public class ContatosFragment extends Fragment {
             if (nome.contains(texto)){
                 listaContatosBusca.add(usuario);
             }
-
         }
 
         adapter = new ContatosAdapter(listaContatosBusca, getActivity());

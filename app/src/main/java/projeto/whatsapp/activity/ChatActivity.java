@@ -85,26 +85,26 @@ public class ChatActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         //Configurações iniciais
-        textViewNome        = findViewById(R.id.textViewNomeChat);
+        textViewNome = findViewById(R.id.textViewNomeChat);
         circleImageViewFoto = findViewById(R.id.circleImageFotoChat);
-        editMensagem        = findViewById(R.id.editMensagem);
-        recyclerMensagens   = findViewById(R.id.recyclerMensagens);
-        imageCamera         = findViewById(R.id.imageCamera);
+        editMensagem = findViewById(R.id.editMensagem);
+        recyclerMensagens = findViewById(R.id.recyclerMensagens);
+        imageCamera = findViewById(R.id.imageCamera);
 
         //recupera dados do usuário remetente
         idUsuarioRemetente = UsuarioFirebase.getIdentificadorUsurio();
         usuarioRemetente = UsuarioFirebase.getDadosUsuarioLogado();
 
         Bundle bundle = getIntent().getExtras();
-        if (bundle != null){
+        if (bundle != null) {
 
-            if (bundle.containsKey("chatGrupo")){
+            if (bundle.containsKey("chatGrupo")) {
                 grupo = (Grupo) bundle.getSerializable("chatGrupo");
                 idUsuarioDestinatario = grupo.getId();
                 textViewNome.setText(grupo.getNome());
 
                 String foto = grupo.getFoto();
-                if(foto != null){
+                if (foto != null) {
                     Uri url = Uri.parse(foto);
                     Glide.with(ChatActivity.this)
                             .load(url)
@@ -117,7 +117,7 @@ public class ChatActivity extends AppCompatActivity {
                 usuarioDestinatario = (Usuario) bundle.getSerializable("chatContato");
                 textViewNome.setText(usuarioDestinatario.getNome());
                 String foto = usuarioDestinatario.getFoto();
-                if(foto != null){
+                if (foto != null) {
                     Uri url = Uri.parse(usuarioDestinatario.getFoto());
                     Glide.with(ChatActivity.this)
                             .load(url)
@@ -151,8 +151,8 @@ public class ChatActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 Intent i = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-                if(i.resolveActivity(getPackageManager()) != null){//verificar se abriu a camera
-                    startActivityForResult(i,SELECAO_CAMERA);
+                if (i.resolveActivity(getPackageManager()) != null) {//verificar se abriu a camera
+                    startActivityForResult(i, SELECAO_CAMERA);
                 }
             }
         });
@@ -162,7 +162,7 @@ public class ChatActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if(resultCode == RESULT_OK) {
+        if (resultCode == RESULT_OK) {
             Bitmap imagem = null;
 
             try {
@@ -181,19 +181,16 @@ public class ChatActivity extends AppCompatActivity {
                     String nomeImagem = UUID.randomUUID().toString();
 
                     //Configurar referencias do Firebase
-                    StorageReference imagemRef = storage.child("imagens")
+                    final StorageReference imagemRef = storage.child("imagens")
                             .child("fotos")
                             .child(idUsuarioRemetente)
                             .child(nomeImagem);
-                    final StorageReference imagemRef2 = imagemRef;
 
                     UploadTask uploadTask = imagemRef.putBytes(dadosImagem);
-                    final UploadTask uploadTask2 = imagemRef2.putBytes(dadosImagem);
 
                     uploadTask.addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Log.d("Erro", "Erro ao fazer upload");
                             Toast.makeText(ChatActivity.this,
                                     "Erro ao fazer upload da imagem",
                                     Toast.LENGTH_SHORT).show();
@@ -202,46 +199,50 @@ public class ChatActivity extends AppCompatActivity {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
 
-                            Task<Uri> urlTask = uploadTask2.continueWithTask(new Continuation<UploadTask.TaskSnapshot, Task<Uri>>() {
-                                @Override
-                                public Task<Uri> then(@NonNull Task<UploadTask.TaskSnapshot> task) throws Exception {
-                                    if (!task.isSuccessful()) {
-                                        throw task.getException();
-                                    }
-
-                                    // Continue with the task to get the download URL
-                                    return imagemRef2.getDownloadUrl();
-                                }
-                            }).addOnCompleteListener(new OnCompleteListener<Uri>() {
+                            imagemRef.getDownloadUrl().addOnCompleteListener(new OnCompleteListener<Uri>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Uri> task) {
-                                    if (task.isSuccessful()) {
-                                        //Uri downloadUri = task.getResult();
-                                        String downloadUrl = task.getResult().toString();
+
+                                    String url = task.getResult().toString();
+
+                                    if (usuarioDestinatario != null) { //mensagem normal
                                         Mensagem mensagem = new Mensagem();
                                         mensagem.setIdUsuario(idUsuarioRemetente);
                                         mensagem.setMensagem("imagem.jpeg");
-                                        mensagem.setImagem(downloadUrl);
+                                        mensagem.setImagem(url);
 
                                         //salvar imagem para o remetente
                                         salvarMensagem(idUsuarioRemetente, idUsuarioDestinatario, mensagem);
                                         //salvar imagem para o destinatário
                                         salvarMensagem(idUsuarioDestinatario, idUsuarioRemetente, mensagem);
 
-                                        Toast.makeText(ChatActivity.this,
-                                                "Sucesso ao enviar foto",
-                                                Toast.LENGTH_SHORT).show();
+                                    } else { //mensagem em grupo
+                                        for (Usuario membro : grupo.getMembros()) {
+                                            String idRemetenteGrupo = Base64Custom.codificarBase64(membro.getEmail());
+                                            String idUsuarioLogadoGrupo = UsuarioFirebase.getIdentificadorUsurio();
 
-                                    } else {
-                                        Toast.makeText(ChatActivity.this,
-                                                "Erro ao enviar foto",
-                                                Toast.LENGTH_SHORT).show();
+                                            Mensagem mensagem = new Mensagem();
+                                            mensagem.setIdUsuario(idUsuarioLogadoGrupo);
+                                            mensagem.setMensagem("imagem.jpeg");
+                                            mensagem.setNome(usuarioRemetente.getNome());
+                                            mensagem.setImagem(url);
+
+                                            //salvar mensagem para o membro
+                                            salvarMensagem(idRemetenteGrupo, idUsuarioDestinatario, mensagem);
+
+                                            //salvar conversa
+                                            salvarConversa(idRemetenteGrupo, idUsuarioDestinatario, usuarioDestinatario, mensagem, true);
+
+                                        }
                                     }
+                                    Toast.makeText(ChatActivity.this,
+                                            "Sucesso ao enviar foto",
+                                            Toast.LENGTH_SHORT).show();
+
                                 }
                             });
                         }
                     });
-
                 }
             } catch (Exception e) {
                 e.printStackTrace();
@@ -249,11 +250,11 @@ public class ChatActivity extends AppCompatActivity {
         }
     }
 
-    public void enviarMensagem(View view){
+    public void enviarMensagem(View view) {
         String textoMensagem = editMensagem.getText().toString();
-        if(!textoMensagem.isEmpty()){
+        if (!textoMensagem.isEmpty()) {
 
-            if ( usuarioDestinatario != null ){
+            if (usuarioDestinatario != null) {
                 Mensagem mensagem = new Mensagem();
                 mensagem.setIdUsuario(idUsuarioRemetente);
                 mensagem.setMensagem(textoMensagem);
@@ -266,11 +267,11 @@ public class ChatActivity extends AppCompatActivity {
                 //salvar conversa remetente
                 salvarConversa(idUsuarioRemetente, idUsuarioDestinatario, usuarioDestinatario, mensagem, false);
 
-                //salvar conversa remetente
+                //salvar conversa destinatario
                 salvarConversa(idUsuarioDestinatario, idUsuarioRemetente, usuarioRemetente, mensagem, false);
 
             } else {
-                for ( Usuario membro: grupo.getMembros()){
+                for (Usuario membro : grupo.getMembros()) {
                     String idRemetenteGrupo = Base64Custom.codificarBase64(membro.getEmail());
                     String idUsuarioLogadoGrupo = UsuarioFirebase.getIdentificadorUsurio();
 
@@ -287,14 +288,14 @@ public class ChatActivity extends AppCompatActivity {
 
                 }
             }
-        }else{
+        } else {
             Toast.makeText(ChatActivity.this,
                     "Digite uma mensagem para enviar",
                     Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void salvarConversa(String idRemetente, String idDestinatario, Usuario usuarioExibicao, Mensagem msg, boolean isGroup){
+    private void salvarConversa(String idRemetente, String idDestinatario, Usuario usuarioExibicao, Mensagem msg, boolean isGroup) {
 
         //salvar conversa remetente
         Conversa conversaRemetente = new Conversa();
@@ -302,10 +303,10 @@ public class ChatActivity extends AppCompatActivity {
         conversaRemetente.setIdDestinatario(idDestinatario);
         conversaRemetente.setUltimaMensagem(msg.getMensagem());
 
-        if (isGroup){ //conversa de grupo
+        if (isGroup) { //conversa de grupo
             conversaRemetente.setIsGroup("true");
             conversaRemetente.setGrupo(grupo);
-        }else{ //conversa normal
+        } else { //conversa normal
             conversaRemetente.setUsuarioExibicao(usuarioExibicao);
             conversaRemetente.setIsGroup("false");
         }
@@ -313,7 +314,7 @@ public class ChatActivity extends AppCompatActivity {
         conversaRemetente.salvar();
     }
 
-    private void salvarMensagem(String idRemetente, String idDestinatario, Mensagem msg){
+    private void salvarMensagem(String idRemetente, String idDestinatario, Mensagem msg) {
 
         DatabaseReference database = ConfiguracaoFirebase.getFirebaseDatabase();
         mensagensRef = database.child("mensagens");
@@ -339,7 +340,7 @@ public class ChatActivity extends AppCompatActivity {
         mensagensRef.removeEventListener(childEventListenerMensagens);
     }
 
-    private void recuperarMensagens(){
+    private void recuperarMensagens() {
 
         mensagens.clear();
 
