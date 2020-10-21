@@ -269,7 +269,6 @@ public class ChatActivity extends AppCompatActivity {
                 //salvar conversa remetente
                 salvarConversa(idUsuarioDestinatario, idUsuarioRemetente, usuarioRemetente, mensagem, false);
 
-
             } else {
                 for ( Usuario membro: grupo.getMembros()){
                     String idRemetenteGrupo = Base64Custom.codificarBase64(membro.getEmail());
